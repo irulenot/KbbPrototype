@@ -1,6 +1,7 @@
 package util;
 
-import model.Auto;
+import exception.AutoException;
+import model.Automobile;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -11,14 +12,16 @@ import java.io.IOException;
  */
 public class FileIO {
 
-    // Method processText method divides the text file then returns a built Auto
+    private AutoException handler = new AutoException();
+
+    // Method processText method divides the text file then returns a built Automobile
         // Some lines of code were inspired by Sukhjit Singh
-    public Auto processText(String fileName, Auto auto) {
+    public Automobile processText(String fileName, Automobile automobile) {
 
         String autoName = new String();
-        String autoCost = new String(); // Auto's constructor variables
+        String autoCost = new String(); // Automobile's constructor variables
 
-        int dataSize = 10; // Must be >= how many lines from text file are read
+        int dataSize = 9; // Must be >= how many lines from text file are read
         int dataCounter = 0; // Keeps track when filling StringBuilder[]
 
         StringBuilder[] dataBase = new StringBuilder[dataSize]; // Stores Strings for OptionSet and Option
@@ -28,7 +31,6 @@ public class FileIO {
             BufferedReader buff = new BufferedReader(file);
             boolean eof = false;
 
-
             while (!eof) { // Loops until all lines of file are read
                 String line = buff.readLine();
 
@@ -36,7 +38,7 @@ public class FileIO {
                     eof = true;
                 else {
 
-                    if (line.contains("Model")) { // reads Auto data to variables
+                    if (line.contains("Model")) { // reads Automobile data to variables
                         String seperate = "[,]";
                         String[] option = line.split(seperate);
 
@@ -45,15 +47,23 @@ public class FileIO {
                     } else if (line.contains(".")) { // reads OptionSet data to StringBuilder[]
                         String optionSet = line;
 
-                        dataBase[dataCounter] = new StringBuilder();
-                        dataBase[dataCounter].append(optionSet);
+                        try {
+                            dataBase[dataCounter] = new StringBuilder();
+                            dataBase[dataCounter].append(optionSet);
+                        } catch (ArrayIndexOutOfBoundsException e){
+                            handler.handleError("processText");
+                        }
 
                         dataCounter++;
                     } else if (line.contains(",")) { // reads Option data to StringBuilder[]
                         String option = line;
 
-                        dataBase[dataCounter] = new StringBuilder();
-                        dataBase[dataCounter].append(option);
+                        try {
+                            dataBase[dataCounter] = new StringBuilder();
+                            dataBase[dataCounter].append(option);
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            handler.handleError("processText");
+                        }
 
                         dataCounter++;
                     }
@@ -64,45 +74,54 @@ public class FileIO {
             buff.close();
 
         } catch (IOException e) {
-            System.out.println("Error " + e.toString());
+            handler.handleError("IOException");
         } // end of gather strings
 
-        return buildAuto(auto, autoName, autoCost, dataBase, dataCounter);
+        return buildAuto(automobile, autoName, autoCost, dataBase, dataCounter);
     }
 
     //
-    protected Auto buildAuto(Auto auto, String autoName, String autoCost, StringBuilder[] dataBase, int dataCounter) {
+    protected Automobile buildAuto(Automobile automobile, String autoName, String autoCost, StringBuilder[] dataBase, int dataCounter) {
         String optionId = "[,]"; // used for identifying Option data
-        
-        double doubleAutoCost = Double.parseDouble(autoCost);
+        double doubleAutoCost = 0;
 
-        auto = new Auto(autoName, doubleAutoCost, dataCounter);
+        try {
+            doubleAutoCost = Double.parseDouble(autoCost);
+        }catch(NumberFormatException e){                    //self healing software, its fix is simply negating the parse.
+            handler.handleError(".parseDouble");
+        }
 
-        for (int indexOfData = 0; indexOfData < dataCounter; indexOfData = (indexOfData + 2)) { //parsing all data 2 lines at a time
-            
-            String optionSet = dataBase[indexOfData].toString(); // 0 and even lines will be OptionSet Strings
-            optionSet = optionSet.substring(1); // first char is deleted as used for identification of OptionSet data
-            
-            String[] option = dataBase[indexOfData+1].toString().split(optionId); // odd lines are Option Strings
-                                                                                    // here we split the line up based on commas ,
-            
-            auto.addOptionSet(optionSet, 0, (option.length/2)); // we add sets with array size based on Option data length
+        automobile = new Automobile(autoName, doubleAutoCost, dataCounter);
 
-            for (int indexOfDataOp = 0; indexOfDataOp < option.length; indexOfDataOp++) { // parsing Option data
+        try {
+            for (int indexOfData = 0; indexOfData < dataCounter; indexOfData = (indexOfData + 2)) { //parsing all data 2 lines at a time
 
-                if (indexOfDataOp%2 != 0){ // for "every other"
-                    String optionName = option[indexOfDataOp-1];
+                String optionSet = dataBase[indexOfData].toString(); // 0 and even lines will be OptionSet Strings
+                optionSet = optionSet.substring(1); // first char is deleted as used for identification of OptionSet data
 
-                    double doubleCost = Double.parseDouble(option[indexOfDataOp]); // converts cost to double
+                String[] option = dataBase[indexOfData + 1].toString().split(optionId); // odd lines are Option Strings
+                // here we split the line up based on commas ,
 
-                    auto.addOption(optionSet, doubleCost, optionName);
-                }
+                automobile.addOptionSet(optionSet, 0, (option.length / 2)); // we add sets with array size based on Option data length
 
-            } // end of parsing Option Data
+                for (int indexOfDataOp = 0; indexOfDataOp < option.length; indexOfDataOp++) { // parsing Option data
 
-        } // end of parsing
+                    if (indexOfDataOp % 2 != 0) { // for "every other"
+                        String optionName = option[indexOfDataOp - 1];
 
-        return auto;
+                        double doubleCost = Double.parseDouble(option[indexOfDataOp]); // converts cost to double
+
+                        automobile.addOption(optionSet, doubleCost, optionName);
+                    }
+
+                } // end of parsing Option Data
+
+            } // end of parsing
+        } catch (ArrayIndexOutOfBoundsException e){
+            handler.handleError("buildAuto");
+        }
+
+        return automobile;
     }
 
 }

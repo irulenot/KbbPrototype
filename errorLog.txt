@@ -1,0 +1,6 @@
+Sun May 01 13:34:51 PDT 2016 printAuto
+Sun May 01 13:34:51 PDT 2016 processText
+Sun May 01 13:34:51 PDT 2016 .parseDouble
+Sun May 01 13:34:51 PDT 2016 buildAuto
+Sun May 01 13:34:51 PDT 2016 updateOptionPrice
+Sun May 01 13:34:51 PDT 2016 updateOptionSetName

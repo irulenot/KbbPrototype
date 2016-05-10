@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  *  Anthony Bilic
  */
-public class Auto implements Serializable {
+public class Automobile implements Serializable {
     // Properties
     private String auto_name;
     private double auto_cost;
@@ -13,12 +13,17 @@ public class Auto implements Serializable {
     private int set_counter = 0;
 
     // Constructors
-    public Auto() {
+    public Automobile() {
         auto_cost = 0;
         auto_name = "";
     }
 
-    public Auto(String autoName, double autoCost, int autoCount) {
+    public Automobile(String autoName) {
+        auto_cost = 0;
+        auto_name = autoName;
+    }
+
+    public Automobile(String autoName, double autoCost, int autoCount) {
         auto_cost = autoCost;
         auto_name = autoName;
         optionSets = new OptionSet[autoCount];
@@ -72,32 +77,6 @@ public class Auto implements Serializable {
         return info.toString();
     }
 
-    public void printAutoData() {   // testing method
-        int setCount = set_counter;
-        int optionCount [] = new int[set_counter];
-
-        System.out.println(auto_name + ", " + auto_cost + ", " + set_counter);
-        System.out.println();
-
-        for(int indexOfSet = 0; indexOfSet < set_counter; indexOfSet++) { // each set
-            String setName = this.optionSets[indexOfSet].getSet_name();
-//            Double setCost = this.optionSets[indexOfSet].getSet_cost();  //useless as all are 0.0
-            int optionCounter = this.optionSets[indexOfSet].getCounter();
-
-            System.out.println(setName + ", " + optionCounter);
-
-            for(int indexOfOption = 0; indexOfOption < optionCounter; indexOfOption++) { // each option
-                String optionName = this.getOption(indexOfSet, indexOfOption).getOption_name();
-                Double optionCost = this.getOption(indexOfSet, indexOfOption).getOption_cost();
-
-                System.out.print("[" +optionName + " " + optionCost + "] ");
-            } // end of option loop
-
-            System.out.println();
-        } // end of set loop
-
-    }
-
     // Get set/option
     public OptionSet getOptionSet(int indexOfSet) { return optionSets[indexOfSet];
     }
@@ -116,19 +95,32 @@ public class Auto implements Serializable {
     }
 
     // Set set/option
-    public void setOptionSet(String setName, String optionName, int optionCost){
+    public void setOptionSet(String setName, String optionName, double optionCost){
         int setNum = this.findOptionSet(setName);
 
         optionSets[setNum].setSet_name(optionName);
         optionSets[setNum].setSet_cost(optionCost);
     }
 
-    public void setOption(String optionSet, String option, String name, int cost){
+    public void setOptionSetName(String setName, String newName){
+        int setNum = this.findOptionSet(setName);
+
+        optionSets[setNum].setSet_name(newName);
+    }
+
+    public void setOption(String optionSet, String option, String name, double cost){
         int setNum = this.findOptionSet(optionSet);
         int optionNum = this.findOption(option, setNum);
 
         optionSets[optionNum].setOption_name(name);
         optionSets[optionNum].setSet_cost(cost);
+    }
+
+    public void setOptionCost(String optionSet, String option, double cost){
+        int setNum = this.findOptionSet(optionSet);
+        int optionNum = this.findOption(option, setNum);
+
+        optionSets[setNum].getOption(optionNum).setOption_cost(cost);
     }
 
     // Add set/option
@@ -176,7 +168,33 @@ public class Auto implements Serializable {
 
         }
 
-        return -1;
+        return -2;
+    }
+
+    public void printAutoData() {   // testing method
+        int setCount = set_counter;
+        int optionCount [] = new int[set_counter];
+
+        System.out.println(auto_name + ", " + auto_cost + ", " + set_counter);
+        System.out.println();
+
+        for(int indexOfSet = 0; indexOfSet < set_counter; indexOfSet++) { // each set
+            String setName = this.optionSets[indexOfSet].getSet_name();
+//            Double setCost = this.optionSets[indexOfSet].getSet_cost();  //useless for now as all are 0.0
+            int optionCounter = this.optionSets[indexOfSet].getCounter();
+
+            System.out.println(setName + ", " + optionCounter);
+
+            for(int indexOfOption = 0; indexOfOption < optionCounter; indexOfOption++) { // each option
+                String optionName = this.getOption(indexOfSet, indexOfOption).getOption_name();
+                Double optionCost = this.getOption(indexOfSet, indexOfOption).getOption_cost();
+
+                System.out.print("[" +optionName + " " + optionCost + "] ");
+            } // end of option loop
+
+            System.out.println();
+        } // end of set loop
+
     }
 
     // delete set/option
